@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package ips.model.v1;
+
+
+service ModelService {
+    rpc PredictCoordinate(PredictCoordinateRequest) returns (PredictCoordinateResponse);
+}
+
+message PredictCoordinateRequest {
+    repeated double strength = 1;
+    string building = 2;
+}
+
+message PredictCoordinateResponse {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+    string label = 4;
+    string building = 5;
+}

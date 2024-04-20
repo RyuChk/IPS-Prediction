@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+import "ips/shared/map/v1/presence.proto";
+import "ips/shared/rssi/v1/rssi.proto";
+import "google/protobuf/timestamp.proto";
+
+package ips.map.v1;
+
+service UserTrackingService {
+    rpc AddUpdateOnlineUser(AddUpdateOnlineUserRequest) returns (AddUpdateOnlineUserResponse);
+    rpc FetchOnlineUser(FetchOnlineUserRequest) returns (FetchOnlineUserResponse);
+}
+
+message AddUpdateOnlineUserRequest {
+    string display_name = 1;
+    string building = 2;
+    int32 floor = 3;
+    string label = 4;
+    ips.shared.rssi.v1.Position position = 5;
+    google.protobuf.Timestamp timestamp = 6;
+}
+
+message AddUpdateOnlineUserResponse {}
+
+message FetchOnlineUserRequest {
+    string building = 1;
+    int32 floor =2;
+}
+
+message FetchOnlineUserResponse {
+    repeated ips.shared.map.v1.OnlineUser online_users = 1;
+    google.protobuf.Timestamp timestamp = 2;
+}

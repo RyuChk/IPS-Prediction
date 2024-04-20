@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "ips/shared/rssi/v1/rssi.proto";
+import "ips/shared/rssi/v1/stat.proto";
+
+package ips.rssi.v1;
+
+service StatCollectionService {
+    rpc CollectData (CollectDataRequest) returns (CollectDataResponse);
+    rpc GetStatData (GetStatDataRequest) returns (GetStatDataResponse);
+    rpc ReDoDataProcessing (ReDoDataProcessingRequest) returns (ReDoDataProcessingResponse);
+}
+
+message CollectDataRequest {
+    repeated ips.shared.rssi.v1.RSSI signals = 1;
+    ips.shared.rssi.v1.DeviceInfo device_info = 2;
+    ips.shared.rssi.v1.Position position = 3;
+    int32 duration = 4;
+    int32 polling_rate = 5;
+    ips.shared.rssi.v1.StatCollectionStage stage = 6;
+    ips.shared.rssi.v1.RecordingDirection direction = 7;
+    google.protobuf.Timestamp started_at = 8;
+    google.protobuf.Timestamp ended_at = 9;
+    google.protobuf.Timestamp created_at = 10;
+}
+
+message CollectDataResponse {
+}
+
+message GetStatDataRequest {
+
+}
+
+message GetStatDataResponse {
+    repeated double rssi = 1;
+    float x = 2;
+    float y = 3;
+    float z = 4;
+    int32 polling_rate = 5;
+    string model = 6;
+    ips.shared.rssi.v1.StatCollectionStage stage = 7;
+}
+
+message ReDoDataProcessingRequest {
+    google.protobuf.Timestamp start_at = 1;
+    google.protobuf.Timestamp end_at = 2;
+}
+
+message ReDoDataProcessingResponse {
+    int32 total_data_processed = 1;
+    int32 total_row_added = 2;
+}

@@ -1,0 +1,65 @@
+include:
+  - project: srv/ci-cd-templates
+    file:
+      - jobs/deploy-argocd.yaml
+
+variables:
+  OUTPUT_NAME: __bin__/$CI_PROJECT_NAME
+  SERVICE_NAME: prediction-service
+  SKIP_BUILD:
+    description: Skip build docker image
+    value: "false"
+  TAG_VERSION:
+    description: If skip build is set tag version is needed
+    value: "tag-version"
+
+stages:
+  - build
+  - release
+
+build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.19.2-debug
+    entrypoint: [""]
+  before_script:
+    - | 
+      echo "$CI_REGISTRY_CA" >> /kaniko/ssl/certs/ca-certificates.crt
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}}" > /kaniko/.docker/config.json
+  script:
+    - |
+      tag=":$CI_COMMIT_SHORT_SHA"
+      echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      echo "Building and shipping image to $CI_REGISTRY/ips/${SERVICE_NAME}${tag}"
+    - mkdir -p /kaniko/.docker
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "$CI_REGISTRY/ips/${SERVICE_NAME}${tag}"
+      --registry-certificate harbor.cie-ips.com=/kaniko/ssl/certs/ca-certificates.crt
+      
+  rules:
+    - if: $SKIP_BUILD == "true"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|develop|main)$/
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_COMMIT_TAG
+      when: never
+
+release:
+  stage: release
+  extends:
+    - .deploy-argo
+  variables:
+    NAMESPACE: development
+    AUTHOR: $CI_COMMIT_AUTHOR
+    PROJECT_PATH: projects/ips-prediction/vars/vars.json
+    GIT_REMOTE: https://project_${CI_PROJECT_ID}_bot:${ARGO_PUSH_TOKEN}@${CI_SERVER_HOST}/srv/argocd.git
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|develop|main)$/
+    - if: $CI_PIPELINE_SOURCE == "web" && $SKIP_BUILD == "false"
+      when: manual
+    - if: $CI_COMMIT_TAG
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "web" && $SKIP_BUILD == "true"
+      when: on_success

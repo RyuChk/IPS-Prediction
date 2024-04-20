@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package ips.shared.user.v1;
+
+message UserInfo {
+    string full_name = 1;
+    string given_name = 2;
+    string preferred_username = 3;
+    string nickname = 4;
+    string email = 5;
+    Role role = 6;
+}
+
+enum Role {
+    ROLE_UNSPECIFIED = 0;
+    ROLE_ADMIN = 1;
+    ROLE_USER = 2;
+}

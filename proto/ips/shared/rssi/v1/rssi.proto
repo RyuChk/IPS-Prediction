@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package ips.shared.rssi.v1;
+
+message RSSI {
+    string ssid = 1;
+    string mac_address = 2;
+    repeated double strength = 3;
+    repeated google.protobuf.Timestamp created_at = 4;
+}
+
+message Position {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+message DeviceInfo {
+    string device_id = 1;
+    string model = 2;
+}
